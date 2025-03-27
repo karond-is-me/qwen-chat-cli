@@ -1,5 +1,6 @@
 use reqwest::header;
 use termimad::MadSkin;
+use  termimad::terminal_size;
 use serde::{Deserialize, Serialize};
 use base64::{engine::general_purpose, Engine as _};
 use arboard::Clipboard;
@@ -217,7 +218,6 @@ impl OpenAiChat {
             return Err(format!("API request failed: {}", response.status()));
         }
         running.store(false, Ordering::Relaxed); // 停止 spinner
-        println!("\r"); // 清除 spinner
         let response_body: OpenAIResponse = response.json().await.map_err(|e| e.to_string())?;
 
         if let Some(choice) = response_body.choices.first() {
@@ -279,8 +279,12 @@ impl OpenAiChat {
             }else{
                 self.add_text("user", &input);
                 let response = self.send().await?;
+                io::stdout().flush().unwrap();
+                print!("\r");
+                io::stdout().flush().unwrap();
                 self.skin.print_text(response.as_str());
-                println!("");
+                let (w,_)= terminal_size();
+                println!("{}", "─".repeat(w.into()));
             }
         }
         Ok(())
