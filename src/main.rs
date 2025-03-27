@@ -208,6 +208,7 @@ impl OpenAiChat {
         });
         let response = self.client
             .post(self.base_url.clone())
+            .timeout(Duration::from_secs(3*60))
             .header(header::AUTHORIZATION, format!("Bearer {}", self.api_key))
             .header(header::CONTENT_TYPE, "application/json")
             .json(&request_body)
